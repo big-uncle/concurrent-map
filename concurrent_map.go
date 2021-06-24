@@ -26,6 +26,21 @@ func New() ConcurrentMap {
 	return m
 }
 
+// return items to the outside
+// When external traversal, it is helpful to reduce heap memory allocation
+// When the external traversal is very frequent, the external traversal by itself will have better performance than using IterBuffered()
+//use example:
+// for _, shard := cmap {
+// 	shard.RLock()
+// 	for _, val := range shard.GetItems() {
+// 		//to do something...
+// 	}
+// 	shard.RUnlock()
+// }
+func (m ConcurrentMapShared) GetItems() map[string]interface{} {
+	return m.items
+}
+
 // GetShard returns shard under given key
 func (m ConcurrentMap) GetShard(key string) *ConcurrentMapShared {
 	return m[uint(fnv32(key))%uint(SHARD_COUNT)]
